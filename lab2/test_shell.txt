@@ -1,0 +1,5 @@
+kill xxx 9
+ps aux | wc -l
+ps aux | grep firefox | wc -l
+cat apple.txt | grep banana | tee banana.txt
+ps aux | grep firefox | wc -l > ps_firefox.txt; cat ps_firefox.txt; echo "hello world" | wc -w >> ps_firefox.txt; cat ps_firefox.txt

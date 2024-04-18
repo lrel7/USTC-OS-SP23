@@ -1,0 +1,23 @@
+Yongkun Li
+Professor 
+School of Computer Science and Technology
+University of Science and Technology of China
+Email:	ykli at ustc dot edu dot cn
+        yongkunlee at gmail dot com
+Office:	Rm 601, High Performance Computing Center USTC (East Campus)
+
+Biography
+Yongkun Li is a professor in School of Computer Science and Technology, 
+University of Science and Technology of China. 
+Before that, he was a postdoctoral fellow at Institute of Network Coding, 
+working with Prof. John C. S. Lui and Prof. Patrick P. C. Lee. 
+He received his Ph.D. degree in Computer Science from The Chinese University of Hong Kong in August 2012,advised by Prof. John C. S. Lui,
+and Bachelor's degree in Computer Science from University of Science and Technology of China in July 2008. 
+He is now mainly focusing on data-intensive computing and storage systems,
+parallel and ditributed systems, key-value systems, 
+and cloud computing, etc. He is a member of CCF/ACM/IEEE, and a member of Youth Innovation Promotion Association CAS.
+
+Research Interests
+Large-scale parallel/distributed storage systems, with emphasis on file systems, memory systems, key-value systems, SSDs, NVRAM, etc.
+Virtualization and cloud computing, with emphasis on memory management and resource scheduling for VM, containers, and serverless computing, etc.
+Storage support for various applications, such as machine learning systems, graph analysis, and distributed DB, etc.
