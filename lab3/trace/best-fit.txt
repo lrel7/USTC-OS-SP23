@@ -1,0 +1,67 @@
+
+Test best-fit allocation
+
+rm -f *~ *.o libmem.so
+gcc -g -fPIC  -Wall -DFIRST_FIT=0   -c -o memlib.o memlib.c
+gcc -g -fPIC  -Wall -DFIRST_FIT=0   -c -o mm.o mm.c
+gcc -g -fPIC  -Wall -DFIRST_FIT=0 -shared -o libmem.so mm.o memlib.o
+time of malloc() : 3976ms
+before free: 0.971754; after free: 0.21819
+time of loop 0 : 5449ms
+time of malloc() : 12933ms
+before free: 0.972011; after free: 0.21671
+time of loop 1 : 13958ms
+time of malloc() : 8578ms
+before free: 0.970978; after free: 0.220482
+time of loop 2 : 9365ms
+time of malloc() : 9092ms
+before free: 0.967858; after free: 0.218587
+time of loop 3 : 9771ms
+time of malloc() : 8664ms
+before free: 0.964811; after free: 0.213779
+time of loop 4 : 9397ms
+time of malloc() : 8009ms
+before free: 0.966365; after free: 0.216486
+time of loop 5 : 8741ms
+time of malloc() : 8203ms
+before free: 0.963814; after free: 0.215146
+time of loop 6 : 8962ms
+time of malloc() : 7809ms
+before free: 0.967057; after free: 0.216016
+time of loop 7 : 8257ms
+time of malloc() : 8443ms
+before free: 0.961424; after free: 0.213795
+time of loop 8 : 9163ms
+time of malloc() : 11045ms
+before free: 0.971064; after free: 0.215637
+time of loop 9 : 11753ms
+time of malloc() : 9147ms
+before free: 0.968794; after free: 0.216595
+time of loop 10 : 9870ms
+time of malloc() : 11717ms
+before free: 0.967507; after free: 0.219914
+time of loop 11 : 13564ms
+time of malloc() : 10933ms
+before free: 0.97048; after free: 0.218296
+time of loop 12 : 12003ms
+time of malloc() : 10964ms
+before free: 0.970281; after free: 0.215841
+time of loop 13 : 11629ms
+time of malloc() : 8219ms
+before free: 0.972174; after free: 0.217413
+time of loop 14 : 8906ms
+time of malloc() : 9795ms
+before free: 0.967305; after free: 0.216913
+time of loop 15 : 10603ms
+time of malloc() : 9436ms
+before free: 0.963665; after free: 0.21568
+time of loop 16 : 10248ms
+time of malloc() : 10877ms
+before free: 0.963823; after free: 0.216463
+time of loop 17 : 11713ms
+time of malloc() : 11365ms
+before free: 0.964156; after free: 0.215264
+time of loop 18 : 12501ms
+time of malloc() : 8839ms
+before free: 0.967491; after free: 0.217325
+time of loop 19 : 9478ms
