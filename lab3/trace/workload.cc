@@ -23,6 +23,8 @@ unsigned int workload_size[WORKLOAD_TYPE] = {12, 16, 24, 32, 48, 64, 96, 100, 12
 extern size_t user_malloc_size;
 extern size_t heap_size;
 
+long malloc_sec, malloc_usec;
+
 /*A simplified workload storage index*/
 struct workload_base {
     void** addr;
@@ -33,10 +35,21 @@ char* gen_random_string(int length) {
     int flag, i;
     char* string;
 
+    /* Begin timing */
+    struct timeval cur_time;
+    gettimeofday(&cur_time, NULL);
+    long sec1 = cur_time.tv_sec, usec1 = cur_time.tv_usec;
+
     if ((string = (char*)malloc(length)) == NULL) {
         std::cerr << "Malloc failed at genRandomString!" << std::endl;
         return NULL;
     }
+
+    /* End timing */
+    gettimeofday(&cur_time, NULL);
+    long sec2 = cur_time.tv_sec, usec2 = cur_time.tv_usec;
+    malloc_sec += (sec2 - sec1);
+    malloc_usec += (usec2 - usec1);
 
     for (i = 0; i < length - 1; i++) {
         flag = rand() % 3;
@@ -76,10 +89,9 @@ int workload_create(struct workload_base* workload) {
 int workload_insert(struct workload_base* workload) {
     unsigned int size, total = 0;
 
-    /* Begin timing */
-    struct timeval cur_time;
-    gettimeofday(&cur_time, NULL);
-    long sec1 = cur_time.tv_sec, usec1 = cur_time.tv_usec;
+    /* Reset timing info */
+    malloc_sec = 0;
+    malloc_usec = 0;
 
     for (int i = 0; i < MAX_ITEMS; i++) {
         if (workload->addr[i] == 0) {
@@ -89,10 +101,8 @@ int workload_insert(struct workload_base* workload) {
         }
     }
 
-    /* End timing */
-    gettimeofday(&cur_time, NULL);
-    long sec2 = cur_time.tv_sec, usec2 = cur_time.tv_usec;
-    std::cout << "time of malloc() : " << (sec2 - sec1) * 1000 + (usec2 - usec1) / 1000 << "ms" << std::endl;
+    /* Print timing info */
+    std::cout << "time of malloc() : " << malloc_sec * 1000 + malloc_usec / 1000 << "ms" << std::endl;
 
     return 0;
 }

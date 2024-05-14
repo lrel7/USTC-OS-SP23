@@ -76,7 +76,7 @@ void* mem_sbrk(int incr) {
     }
 
     if ((mem_brk + incr) > mem_max_addr) {
-        size_t sbrk_incr = (incr + MAX_HEAP - 1) & ~(MAX_HEAP - 1);  // align `incr` to `MAX_HEAP`
+        size_t sbrk_incr = (incr + MAX_HEAP - 1) / MAX_HEAP * MAX_HEAP;  // align `incr` to `MAX_HEAP`
         if (sbrk(sbrk_incr) == (void*)-1) {
             fprintf(stderr, "ERROR: mem_sbrk failed because sbrk failed\n");
             exit(1);
