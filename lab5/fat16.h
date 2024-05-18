@@ -44,6 +44,10 @@
 
 #define MAX_NAME_LEN 512
 
+// Added by me
+#define FAT_ENTRY_SIZE 2  // 本次实验中， FAT 项为 2 个字节大小 (by 实验文档) 
+
+
 typedef uint16_t cluster_t;
 typedef uint64_t sector_t;
 typedef uint8_t attr_t;
