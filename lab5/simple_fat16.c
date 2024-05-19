@@ -563,7 +563,7 @@ int fat16_read(const char* path, char* buffer, size_t size, off_t offset, struct
         if (!is_cluster_inuse(clus)) {
             return -EUCLEAN;
         }
-        size_t read_size = min(offset + size, meta.cluster_size);  // 要在这个簇读取的字节数
+        size_t read_size = min(size - p, meta.cluster_size - offset);  // 要在这个簇读取的字节数
         size_t ret = read_from_cluster_at_offset(clus, offset, buffer + p, read_size);
         if (ret < 0) {
             return ret;
@@ -661,7 +661,7 @@ int fat16_mknod(const char* path, mode_t mode, dev_t dev) {
     if (ret < 0) {
         return ret;
     }
-    ret = dir_entry_create(slot, shortname, ATTR_REGULAR, 0, 0);  // 创建目录项，请查看并补全 dir_entry_create 函数
+    ret = dir_entry_create(slot, shortname, ATTR_REGULAR, CLUSTER_END, 0);  // 创建目录项，请查看并补全 dir_entry_create 函数
     if (ret < 0) {
         return ret;
     }
@@ -794,6 +794,10 @@ int alloc_clusters(size_t n, cluster_t* first_clus) {
         if (read_fat_entry(c) == CLUSTER_FREE) {              // 找到了空闲簇
             clusters[allocated++] = c;                        // 存入 `clusters` 数组
         }
+        if (allocated == n) {           // 已经找到了 n 个空闲簇
+            clusters[n] = CLUSTER_END;  // 末尾为 `CLUSTER_END`
+            break;
+        }
     }
 
     if (allocated < n) {  // 找不到 n 个空闲簇
@@ -802,8 +806,7 @@ int alloc_clusters(size_t n, cluster_t* first_clus) {
     }
 
     for (size_t i = 0; i < n; i++) {
-        cluster_t next_clus = (i == n - 1) ? CLUSTER_END : clusters[i + 1];  // 下一个簇号
-        write_fat_entry(clusters[i], next_clus);
+        write_fat_entry(clusters[i], clusters[i + 1]);
         cluster_clear(clusters[i]);
     }
 
@@ -844,9 +847,6 @@ int fat16_mkdir(const char* path, mode_t mode) {
     if ((ret = find_empty_slot(path, &slot, &filename)) < 0) {  // 在上级文件夹中找一个空的目录项
         return ret;
     }
-
-    printf("\n\nfilename = %s\n", filename);
-    printf("dir_clus = %d\n\n", dir_clus);
 
     char shortname[11];
     if ((ret = to_shortname(filename, MAX_NAME_LEN, shortname)) < 0) {  // 将长文件名转换为短文件名
@@ -1030,9 +1030,6 @@ ssize_t write_to_cluster_at_offset(cluster_t clus, off_t offset, const char* dat
 
         /* 将 `data` 中的内容移到这个扇区中，但不应超过 `size` */
         size_t cpy_size = min(size - pos, meta.sector_size - sec_off);
-
-        printf("\nsec_off = %d, cpy_size = %d\n\n", sec_off, cpy_size);
-
         memcpy(sector_buffer + sec_off, data + pos, cpy_size);
         if (sector_write(sec, sector_buffer) < 0) {
             return -EIO;
@@ -1092,19 +1089,23 @@ int fat16_write(const char* path, const char* data, size_t size, off_t offset, s
     size_t new_filesize = offset + size;
     size_t old_num_clus = (dir->DIR_FileSize + meta.cluster_size - 1) / meta.cluster_size;  // 原文件需要的簇数量
     size_t new_num_clus = (new_filesize + meta.cluster_size - 1) / meta.cluster_size;       // 新文件需要的簇数量
-    if (old_num_clus < new_num_clus) {                                                      // 需要分配新簇
-        cluster_t new_first_clus;                                                           // 新分配的第一个簇
-        alloc_clusters(new_num_clus - old_num_clus, &new_first_clus);                       // 分配新簇
+
+    if (old_num_clus < new_num_clus) {  // 需要分配新簇
+        cluster_t new_first_clus;       // 新分配的第一个簇
+
+        alloc_clusters(new_num_clus - old_num_clus, &new_first_clus);  // 分配新簇
 
         /* 将新分配的簇链接到原来簇的末尾 */
-        cluster_t last_clus = dir->DIR_FstClusLO;  // 初始化为第一个簇
-        for (size_t i = 0; i < old_num_clus - 1; i++) {
-            last_clus = read_fat_entry(last_clus);  // 移动到下一个簇
+        if (old_num_clus == 0) {  // 原本没有簇，直接设置 DIR_FstClusLO
+            dir->DIR_FstClusLO = new_first_clus;
+        } else {
+            cluster_t last_clus = dir->DIR_FstClusLO;  // 初始化为第一个簇
+            for (size_t i = 0; i < old_num_clus - 1; i++) {
+                last_clus = read_fat_entry(last_clus);  // 移动到下一个簇
+            }
+            write_fat_entry(last_clus, new_first_clus);
         }
-        write_fat_entry(last_clus, new_first_clus);
     }
-
-    printf("\nI am here\n");
 
     /* 移动到开始写入的簇 */
     cluster_t clus = dir->DIR_FstClusLO;   // 文件第一个簇
@@ -1122,7 +1123,7 @@ int fat16_write(const char* path, const char* data, size_t size, off_t offset, s
             return -EUCLEAN;
         }
 
-        size_t write_size = min(offset + size, meta.cluster_size);                 // 要向这个簇写入的字节数
+        size_t write_size = min(size - p, meta.cluster_size - offset);             // 要向这个簇写入的字节数
         int ret = write_to_cluster_at_offset(clus, offset, data + p, write_size);  // 写入簇
         if (ret < 0) {
             return ret;
